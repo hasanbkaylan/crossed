@@ -11,12 +11,12 @@ class CrossedRepository(
     val totalPhotosCount: Flow<Int> = photoDao.getPhotoCount()
     val allPhotos: Flow<List<ScannedPhoto>> = photoDao.getAllPhotos()
 
-    suspend fun scanAndSavePhotos(): Int {
-        val photos = photoScanner.scanPhotos()
+    suspend fun scanAndSavePhotos(): Pair<Int, Int> {
+        val (totalScanned, photos) = photoScanner.scanPhotos()
         if (photos.isNotEmpty()) {
             photoDao.insertPhotos(photos)
         }
-        return photos.size
+        return Pair(totalScanned, photos.size)
     }
 
     suspend fun getMyHashes(): List<String> {

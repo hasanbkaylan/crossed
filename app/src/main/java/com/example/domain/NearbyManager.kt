@@ -21,6 +21,7 @@ sealed class MatchStatus {
     data class MatchComplete(val matchedHashes: List<String>) : MatchStatus()
     object NoMatch : MatchStatus()
     data class Error(val message: String) : MatchStatus()
+    object NoDeviceFound : MatchStatus()
 }
 
 interface NearbyManager {
@@ -29,7 +30,6 @@ interface NearbyManager {
     fun stopDiscovery()
     fun approveMatch(myHashes: List<String>)
     fun rejectMatch()
-    fun setMockPeerHashes(hashes: List<String>) // For Simulation mode
 }
 
 class SimulatedNearbyManager : NearbyManager {
@@ -37,15 +37,13 @@ class SimulatedNearbyManager : NearbyManager {
     override val matchStatus: StateFlow<MatchStatus> = _matchStatus
     
     private var simulatedJob: Job? = null
-    
-    private var mockPeerHashes: List<String> = emptyList()
 
     override fun startDiscovery() {
         _matchStatus.value = MatchStatus.Discovering
         
         simulatedJob = GlobalScope.launch {
-            delay(3000)
-            _matchStatus.value = MatchStatus.DeviceFound(NearbyDevice("peer_123", "Alice's Phone"))
+            delay(5000)
+            _matchStatus.value = MatchStatus.NoDeviceFound
         }
     }
 
@@ -55,32 +53,10 @@ class SimulatedNearbyManager : NearbyManager {
     }
 
     override fun approveMatch(myHashes: List<String>) {
-        _matchStatus.value = MatchStatus.ExchangingData
-        
-        simulatedJob = GlobalScope.launch {
-            delay(2000)
-            
-            val matches = myHashes.intersect(mockPeerHashes.toSet()).toList()
-            
-            if (matches.isNotEmpty()) {
-                _matchStatus.value = MatchStatus.MatchComplete(matches)
-            } else {
-                _matchStatus.value = MatchStatus.NoMatch
-            }
-        }
+        // Not reachable in this state
     }
 
     override fun rejectMatch() {
         stopDiscovery()
     }
-    
-    override fun setMockPeerHashes(hashes: List<String>) {
-        val fakeMatches = mutableListOf<String>()
-        if (hashes.isNotEmpty()) {
-             fakeMatches.add(hashes.random()) // Peer crossed paths here!
-        }
-        fakeMatches.add(HashUtil.createLocationHash(40.0, -73.0, System.currentTimeMillis()))
-        mockPeerHashes = fakeMatches
-    }
 }
-

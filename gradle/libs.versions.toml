@@ -1,4 +1,5 @@
 [versions]
+exifinterface = "1.3.7"
 appcompat = "1.6.1"
 agp = "9.1.1"
 coreKtx = "1.18.0"
@@ -45,6 +46,7 @@ googleid = "1.1.1"
 
 
 [libraries]
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -34,6 +34,7 @@
 
     <string name="about_title">About</string>
     <string name="about_version">Version %1$s</string>
+    <string name="about_developer">Developer: Hasan Berat Kaylan</string>
     <string name="about_foss_title">Free and Open Source</string>
     <string name="about_foss_desc">This application is Free and Open Source Software (FOSS). It is distributed under the GPLv3 License.</string>
     <string name="about_btn_source">View Source Code (GitHub)</string>
@@ -53,7 +54,7 @@
 
     <string name="nearby_title">Nearby Discovery</string>
     <string name="nearby_looking">Looking for nearby friends…</string>
-    <string name="nearby_ensure_open">Ensure your friend has this app open and is nearby. (Simulation Mode: This will auto-find a mock peer).</string>
+    <string name="nearby_ensure_open">Ensure your friend has this app open and is nearby. </string>
     <string name="nearby_found">Found %1$s</string>
     <string name="nearby_compare_prompt">Do you want to securely compare location history?</string>
     <string name="nearby_btn_cancel">Cancel</string>
@@ -64,6 +65,8 @@
     <string name="nearby_match_count">You were in the same place at the same time %1$d time(s).</string>
     <string name="nearby_no_crossings">No crossings found.</string>
     <string name="nearby_no_crossings_desc">It seems you\'ve never been in the same place at the same time.</string>
+    <string name="nearby_no_device_found">No nearby devices found.</string>
+    <string name="nearby_no_device_found_desc">We couldn\'t find anyone nearby with the app open. Please make sure your friend has the app open and is on this screen.</string>
     <string name="nearby_btn_back">Go Back</string>
     <string name="nearby_btn_done">Done</string>
     <string name="nearby_error">Error: %1$s</string>

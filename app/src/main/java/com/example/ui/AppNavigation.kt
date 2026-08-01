@@ -23,6 +23,9 @@ fun AppNavigation(viewModel: MainViewModel) {
         composable("about") {
             AboutScreen(navController = navController)
         }
+        composable("licenses") {
+            LicensesScreen(navController = navController)
+        }
         composable("settings") {
             SettingsScreen(viewModel = viewModel, navController = navController)
         }

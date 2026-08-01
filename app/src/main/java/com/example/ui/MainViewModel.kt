@@ -41,8 +41,8 @@ class MainViewModel(
         
         viewModelScope.launch {
             try {
-                val count = repository.scanAndSavePhotos()
-                _lastScanResult.value = UiText.StringResource(R.string.home_scanned_result, count)
+                val (total, locationCount) = repository.scanAndSavePhotos()
+                _lastScanResult.value = UiText.DynamicString("Scanned $total photos. Found $locationCount with location data.")
             } catch (e: Exception) {
                 _lastScanResult.value = UiText.StringResource(R.string.home_scan_error, e.message ?: "Unknown Error")
             } finally {
@@ -52,10 +52,7 @@ class MainViewModel(
     }
 
     fun startNearbyDiscovery() {
-        // Only for simulation: feed our hashes to the mock peer so we can get a match if we have any photos.
         viewModelScope.launch {
-            val hashes = repository.getMyHashes()
-            nearbyManager.setMockPeerHashes(hashes)
             nearbyManager.startDiscovery()
         }
     }

@@ -34,6 +34,7 @@
 
     <string name="about_title">Hakkında</string>
     <string name="about_version">Sürüm %1$s</string>
+    <string name="about_developer">Geliştirici: Hasan Berat Kaylan</string>
     <string name="about_foss_title">Özgür ve Açık Kaynak</string>
     <string name="about_foss_desc">Bu uygulama Özgür ve Açık Kaynaklı Yazılımdır (FOSS). GPLv3 Lisansı altında dağıtılmaktadır.</string>
     <string name="about_btn_source">Kaynak Kodunu Görüntüle (GitHub)</string>
@@ -53,7 +54,7 @@
 
     <string name="nearby_title">Yakın Keşif</string>
     <string name="nearby_looking">Yakındaki arkadaşlar aranıyor…</string>
-    <string name="nearby_ensure_open">Arkadaşınızın bu uygulamayı açtığından ve yakında olduğundan emin olun. (Simülasyon Modu: Otomatik olarak sahte bir eş bulacaktır).</string>
+    <string name="nearby_ensure_open">Arkadaşınızın bu uygulamayı açtığından ve yakında olduğundan emin olun. </string>
     <string name="nearby_found">Bulundu: %1$s</string>
     <string name="nearby_compare_prompt">Konum geçmişinizi güvenle karşılaştırmak istiyor musunuz?</string>
     <string name="nearby_btn_cancel">İptal</string>
@@ -64,6 +65,8 @@
     <string name="nearby_match_count">Aynı yerde aynı zamanda %1$d kez bulundunuz.</string>
     <string name="nearby_no_crossings">Kesişme bulunamadı.</string>
     <string name="nearby_no_crossings_desc">Görünüşe göre daha önce aynı yerde aynı zamanda bulunmamışsınız.</string>
+    <string name="nearby_no_device_found">Yakında başka bir cihaz bulunamadı.</string>
+    <string name="nearby_no_device_found_desc">Uygulaması açık olan yakında kimseyi bulamadık. Lütfen arkadaşınızın uygulamayı açtığından ve bu ekranda olduğundan emin olun.</string>
     <string name="nearby_btn_back">Geri Dön</string>
     <string name="nearby_btn_done">Bitti</string>
     <string name="nearby_error">Hata: %1$s</string>

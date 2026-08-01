@@ -5,6 +5,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -178,6 +179,21 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(stringResource(R.string.nearby_no_crossings_desc))
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Button(onClick = { navController.navigateUp() }) {
+                        Text(stringResource(R.string.nearby_btn_back))
+                    }
+                }
+
+                is MatchStatus.NoDeviceFound -> {
+                    Icon(Icons.Default.SearchOff, contentDescription = null, modifier = Modifier.size(64.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        stringResource(R.string.nearby_no_device_found),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.nearby_no_device_found_desc), textAlign = TextAlign.Center)
                     Spacer(modifier = Modifier.height(32.dp))
                     Button(onClick = { navController.navigateUp() }) {
                         Text(stringResource(R.string.nearby_btn_back))
