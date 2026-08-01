@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">Crossed</string>
+    <string name="nav_home">Ana Sayfa</string>
+    <string name="nav_privacy">Gizlilik Nasıl Çalışır?</string>
+    <string name="nav_settings">Ayarlar ve Veriler</string>
+    <string name="nav_about">Hakkında (Açık Kaynak)</string>
+
+    <string name="home_local_database">Yerel Veritabanı</string>
+    <string name="home_photos_scanned">%1$d fotoğraf tarandı</string>
+    <string name="home_scanning">Fotoğraflar cihaz üzerinde güvenle taranıyor…</string>
+    <string name="home_scan_initial">Cihaz Fotoğraflarını Tara</string>
+    <string name="home_scan_update">Yeni Fotoğraflar İçin Tara</string>
+    <string name="home_find_nearby">Yakınımdakileri Bul</string>
+    <string name="home_no_internet_warning">İnternet gerekmez. Keşif tamamen yereldir (P2P).</string>
+    <string name="home_scanned_result">Konum verisi içeren %1$d fotoğraf tarandı.</string>
+    <string name="home_scan_error">Tarama hatası: %1$s</string>
+    
+    <string name="settings_title">Ayarlar ve Veriler</string>
+    <string name="settings_data_management">Veri Yönetimi</string>
+    <string name="settings_delete_all">Tüm Verileri Sil</string>
+    <string name="settings_delete_desc">Bu işlem bu cihazdaki tüm konum özetlerini anında kaldırır. Uygulamanın sunucusu olmadığı için bu işlem kalıcıdır.</string>
+    <string name="settings_language">Dil (Language)</string>
+    <string name="settings_language_desc">Uygulama dilini seçin.</string>
+    <string name="settings_language_system">Sistem Varsayılanı</string>
+    <string name="settings_language_en">İngilizce (English)</string>
+    <string name="settings_language_tr">Türkçe</string>
+
+    <string name="dialog_delete_title">Veriler Silinsin mi?</string>
+    <string name="dialog_delete_text">Bu, taranmış tüm fotoğrafları ve özetleri yerel veritabanınızdan kalıcı olarak silecektir.</string>
+    <string name="dialog_delete_confirm">Sil</string>
+    <string name="dialog_delete_cancel">İptal</string>
+    
+    <string name="settings_deleted_result">Tüm veriler kalıcı olarak silindi.</string>
+
+    <string name="about_title">Hakkında</string>
+    <string name="about_version">Sürüm %1$s</string>
+    <string name="about_foss_title">Özgür ve Açık Kaynak</string>
+    <string name="about_foss_desc">Bu uygulama Özgür ve Açık Kaynaklı Yazılımdır (FOSS). GPLv3 Lisansı altında dağıtılmaktadır.</string>
+    <string name="about_btn_source">Kaynak Kodunu Görüntüle (GitHub)</string>
+    <string name="about_btn_issue">Hata Bildir</string>
+    <string name="about_btn_licenses">Açık Kaynak Lisansları</string>
+
+    <string name="privacy_title">Gizlilik Nasıl Çalışır?</string>
+    <string name="privacy_main_heading">Önce Gizlilik</string>
+    <string name="privacy_1_title">1. İnternet Yok</string>
+    <string name="privacy_1_desc">Bu uygulamanın internete bağlanma yeteneği yoktur. Analitik, izleme veya bulut senkronizasyonu kullanmıyoruz. Tüm veriler kesinlikle cihazınızda kalır.</string>
+    <string name="privacy_2_title">2. Konum Özeti (Hashing)</string>
+    <string name="privacy_2_desc">Ham konum ve zaman veriniz asla kimseye gönderilmez. Geri döndürülemez bir \"özet\" (karışık metin) haline getirilir. Bir arkadaşınızla karşılaştırırken, uygulama sadece bu karışık metinlerin eşleşip eşleşmediğini kontrol eder.</string>
+    <string name="privacy_3_title">3. Açık Onay</string>
+    <string name="privacy_3_desc">Arka planda hiçbir zaman özet (hash) paylaşmayız. Siz ve arkadaşınız eşleşmeyi başlatmak için keşif ekranında açıkça \"Karşılaştır\" düğmesine dokunmalısınız.</string>
+    <string name="privacy_4_title">4. Tam Kontrol</string>
+    <string name="privacy_4_desc">Taranan tüm verileri Ayarlar menüsünden anında silebilirsiniz. Her şey yerel olduğu için, buradan silmek tamamen yok olması demektir.</string>
+
+    <string name="nearby_title">Yakın Keşif</string>
+    <string name="nearby_looking">Yakındaki arkadaşlar aranıyor…</string>
+    <string name="nearby_ensure_open">Arkadaşınızın bu uygulamayı açtığından ve yakında olduğundan emin olun. (Simülasyon Modu: Otomatik olarak sahte bir eş bulacaktır).</string>
+    <string name="nearby_found">Bulundu: %1$s</string>
+    <string name="nearby_compare_prompt">Konum geçmişinizi güvenle karşılaştırmak istiyor musunuz?</string>
+    <string name="nearby_btn_cancel">İptal</string>
+    <string name="nearby_btn_compare">Karşılaştır</string>
+    <string name="nearby_exchanging">Konum özetleri değiş tokuş ediliyor…</string>
+    <string name="nearby_intersecting">Yalnızca kesişen özetler (hash) açığa çıkacaktır.</string>
+    <string name="nearby_paths_crossed">Yollar Kesişti!</string>
+    <string name="nearby_match_count">Aynı yerde aynı zamanda %1$d kez bulundunuz.</string>
+    <string name="nearby_no_crossings">Kesişme bulunamadı.</string>
+    <string name="nearby_no_crossings_desc">Görünüşe göre daha önce aynı yerde aynı zamanda bulunmamışsınız.</string>
+    <string name="nearby_btn_back">Geri Dön</string>
+    <string name="nearby_btn_done">Bitti</string>
+    <string name="nearby_error">Hata: %1$s</string>
+    <string name="nearby_date">Tarih: %1$s</string>
+    <string name="nearby_location">Enlem: %1$s, Boylam: %2$s</string>
+</resources>

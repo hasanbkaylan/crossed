@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">Crossed</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_privacy">How Privacy Works</string>
+    <string name="nav_settings">Settings &amp; Data</string>
+    <string name="nav_about">About (Open Source)</string>
+
+    <string name="home_local_database">Local Database</string>
+    <string name="home_photos_scanned">%1$d photos scanned</string>
+    <string name="home_scanning">Scanning photos securely on device…</string>
+    <string name="home_scan_initial">Scan Device Photos</string>
+    <string name="home_scan_update">Scan For New Photos</string>
+    <string name="home_find_nearby">Find Nearby Friends</string>
+    <string name="home_no_internet_warning">No internet required. Discovery is purely local (P2P).</string>
+    <string name="home_scanned_result">Scanned %1$d photos with location data.</string>
+    <string name="home_scan_error">Error scanning: %1$s</string>
+    
+    <string name="settings_title">Settings &amp; Data</string>
+    <string name="settings_data_management">Data Management</string>
+    <string name="settings_delete_all">Delete All Data</string>
+    <string name="settings_delete_desc">This will instantly remove all location hashes from this device. As the app has no servers, this action is permanent.</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_desc">Choose the application language.</string>
+    <string name="settings_language_system">System Default</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_tr">Turkish (Türkçe)</string>
+
+    <string name="dialog_delete_title">Delete Data?</string>
+    <string name="dialog_delete_text">This will delete all scanned photos and hashes from your local database permanently.</string>
+    <string name="dialog_delete_confirm">Delete</string>
+    <string name="dialog_delete_cancel">Cancel</string>
+    
+    <string name="settings_deleted_result">All data permanently deleted.</string>
+
+    <string name="about_title">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_foss_title">Free and Open Source</string>
+    <string name="about_foss_desc">This application is Free and Open Source Software (FOSS). It is distributed under the GPLv3 License.</string>
+    <string name="about_btn_source">View Source Code (GitHub)</string>
+    <string name="about_btn_issue">Report an Issue</string>
+    <string name="about_btn_licenses">Open Source Licenses</string>
+
+    <string name="privacy_title">How Privacy Works</string>
+    <string name="privacy_main_heading">Privacy First</string>
+    <string name="privacy_1_title">1. Zero Internet</string>
+    <string name="privacy_1_desc">This app has no capability to connect to the internet. We do not use analytics, tracking, or cloud sync. All data stays strictly on your device.</string>
+    <string name="privacy_2_title">2. Location Hashing</string>
+    <string name="privacy_2_desc">Your raw location and time data is never sent to anyone. It is converted into an irreversible \"hash\" (a scramble of text). When comparing with a friend, the app only checks if any of these scrambles match.</string>
+    <string name="privacy_3_title">3. Explicit Consent</string>
+    <string name="privacy_3_desc">We never share any hashes in the background. You and your friend must both explicitly tap \"Compare\" on the discovery screen to initiate the exchange.</string>
+    <string name="privacy_4_title">4. Full Control</string>
+    <string name="privacy_4_desc">You can delete all scanned data instantly from the Settings menu. Because everything is local, deleting it here means it\'s gone forever.</string>
+
+    <string name="nearby_title">Nearby Discovery</string>
+    <string name="nearby_looking">Looking for nearby friends…</string>
+    <string name="nearby_ensure_open">Ensure your friend has this app open and is nearby. (Simulation Mode: This will auto-find a mock peer).</string>
+    <string name="nearby_found">Found %1$s</string>
+    <string name="nearby_compare_prompt">Do you want to securely compare location history?</string>
+    <string name="nearby_btn_cancel">Cancel</string>
+    <string name="nearby_btn_compare">Compare</string>
+    <string name="nearby_exchanging">Exchanging location hashes…</string>
+    <string name="nearby_intersecting">Only intersecting hashes will be revealed.</string>
+    <string name="nearby_paths_crossed">Paths Crossed!</string>
+    <string name="nearby_match_count">You were in the same place at the same time %1$d time(s).</string>
+    <string name="nearby_no_crossings">No crossings found.</string>
+    <string name="nearby_no_crossings_desc">It seems you\'ve never been in the same place at the same time.</string>
+    <string name="nearby_btn_back">Go Back</string>
+    <string name="nearby_btn_done">Done</string>
+    <string name="nearby_error">Error: %1$s</string>
+    <string name="nearby_date">Date: %1$s</string>
+    <string name="nearby_location">Lat: %1$s, Lon: %2$s</string>
+</resources>

@@ -1,0 +1,6 @@
+{
+  "name": "Crossed",
+  "description": "A privacy-first app to discover past path crossings with friends using local photo metadata and nearby P2P connections.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
