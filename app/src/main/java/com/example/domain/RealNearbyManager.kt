@@ -25,6 +25,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
     private var timeoutJob: Job? = null
 
     // Handshake state
+    private var autoAcceptConnection = false
     private var peerDataReceived = false
     private var peerAckReceived = false
     private var matchesResult: List<String>? = null
@@ -70,6 +71,14 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
                 _matchStatus.value = MatchStatus.ConnectionRequested(NearbyDevice(endpointId, info.endpointName))
             } else {
                 _matchStatus.value = MatchStatus.Connecting(NearbyDevice(endpointId, info.endpointName))
+                if (autoAcceptConnection) {
+                    Log.d("CROSSED_NEARBY", "Auto-accepting connection as initiator")
+                    connectionsClient.acceptConnection(endpointId, payloadCallback)
+                        .addOnFailureListener { e ->
+                            Log.e("CROSSED_NEARBY", "acceptConnection failed", e)
+                            _matchStatus.value = MatchStatus.Error("Otomatik kabul başarısız: ${e.message}")
+                        }
+                }
             }
         }
 
@@ -166,6 +175,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
         stopDiscoveryInternal(preserveStatus = false)
         this.myName = myName.ifBlank { android.os.Build.MODEL }
         discoveredDevices.clear()
+        autoAcceptConnection = false
         _matchStatus.value = MatchStatus.Discovering(emptyList())
         
         startTimeout(60000, "Cihaz arama zaman aşımına uğradı. (Lütfen tekrar deneyin)")
@@ -186,12 +196,15 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
             }
     }
     
-    override fun requestConnection(deviceId: String) {
+    override fun requestConnection(deviceId: String, myHashes: List<String>) {
         val device = discoveredDevices[deviceId] ?: return
         if (_matchStatus.value is MatchStatus.Connecting || _matchStatus.value is MatchStatus.ConnectionRequested) return
         
         Log.d("CROSSED_NEARBY", "requestConnection to $deviceId")
         _matchStatus.value = MatchStatus.Connecting(device)
+        myHashesToSend = myHashes
+        autoAcceptConnection = false
+        autoAcceptConnection = true
         startTimeout(60000, "Bağlantı isteği zaman aşımına uğradı.")
         
         connectionsClient.requestConnection(myName, deviceId, connectionLifecycleCallback)
@@ -209,6 +222,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
         connectionsClient.stopAllEndpoints()
         currentEndpointId = null
         discoveredDevices.clear()
+        autoAcceptConnection = false
         peerDataReceived = false
         peerAckReceived = false
         matchesResult = null
@@ -234,6 +248,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
         
         Log.d("CROSSED_NEARBY", "approveMatch for $endpointId")
         myHashesToSend = myHashes
+        autoAcceptConnection = false
         _matchStatus.value = MatchStatus.ExchangingData
         startTimeout(30000, "Veri değiş tokuşu zaman aşımına uğradı.")
         

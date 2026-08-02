@@ -68,7 +68,11 @@ class MainViewModel(
     }
     
     fun requestConnection(deviceId: String) {
-        nearbyManager.requestConnection(deviceId)
+        viewModelScope.launch {
+            val radius = settingsManager.radiusFlow.first()
+            val hashes = repository.getMyHashes(radius)
+            nearbyManager.requestConnection(deviceId, hashes)
+        }
     }
 
     fun stopNearbyDiscovery() {

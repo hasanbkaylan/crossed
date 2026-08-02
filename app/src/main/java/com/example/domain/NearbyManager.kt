@@ -23,7 +23,7 @@ interface NearbyManager {
     val matchStatus: StateFlow<MatchStatus>
     fun startDiscovery(myName: String)
     fun stopDiscovery()
-    fun requestConnection(deviceId: String)
+    fun requestConnection(deviceId: String, myHashes: List<String>)
     fun approveMatch(myHashes: List<String>)
     fun rejectMatch()
 }
