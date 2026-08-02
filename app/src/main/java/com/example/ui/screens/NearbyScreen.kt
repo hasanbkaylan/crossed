@@ -61,6 +61,16 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
 
     val permissionState = rememberMultiplePermissionsState(permissions)
 
+    var statusTimer by remember { mutableStateOf(0) }
+    LaunchedEffect(matchStatus) {
+        statusTimer = 0
+        while (true) {
+            kotlinx.coroutines.delay(1000)
+            statusTimer++
+        }
+    }
+
+
     val context = LocalContext.current
     val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
     val bluetoothAdapter = bluetoothManager?.adapter
@@ -174,12 +184,12 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                 is MatchStatus.Idle -> {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("Hazırlanıyor...", style = MaterialTheme.typography.titleLarge)
+                    Text("Hazırlanıyor... ($statusTimer sn)", style = MaterialTheme.typography.titleLarge)
                 }
                 is MatchStatus.Discovering -> {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text(stringResource(R.string.nearby_looking), style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.nearby_looking) + " ($statusTimer sn)", style = MaterialTheme.typography.titleLarge)
                     Text(
                         stringResource(R.string.nearby_ensure_open),
                         style = MaterialTheme.typography.bodyMedium,
@@ -215,7 +225,7 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                 is MatchStatus.Connecting -> {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text(stringResource(R.string.nearby_connecting, status.device.name), style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.nearby_connecting, status.device.name) + " ($statusTimer sn)", style = MaterialTheme.typography.titleLarge)
                     Spacer(modifier = Modifier.height(32.dp))
                     OutlinedButton(onClick = { viewModel.startNearbyDiscovery() }) {
                         Text(stringResource(R.string.nearby_btn_cancel))
@@ -262,7 +272,7 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                 is MatchStatus.ExchangingData -> {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text(stringResource(R.string.nearby_exchanging), style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.nearby_exchanging) + " ($statusTimer sn)", style = MaterialTheme.typography.titleLarge)
                     Text(
                         stringResource(R.string.nearby_intersecting),
                         style = MaterialTheme.typography.bodyMedium,
