@@ -94,6 +94,8 @@
     <string name="onboarding_desc_1">Arkadaşlarınızla geçmişte nerelerde yollarınızın kesiştiğini güvenli ve eğlenceli bir şekilde keşfedin.</string>
     <string name="onboarding_title_2">Gizliliğiniz Güvende</string>
     <string name="onboarding_desc_2">Crossed internete bağlanmaz. Fotoğraflarınız ve konumlarınız cihazınızdan asla dışarı çıkmaz. Tüm karşılaştırmalar yerel cihazlar arasında P2P (uçtan uca) yapılır.</string>
+    <string name="onboarding_title_permissions">İzinler Hakkında</string>
+    <string name="onboarding_desc_permissions">Fotoğraflarındaki konum bilgisini okuyabilmemiz için galeri izni istiyoruz — fotoğraflarınızın kendisini asla görmüyor veya paylaşmıyoruz.\n\nYakındaki arkadaşını bulabilmemiz için Bluetooth/yakındaki cihazlar iznine ihtiyacımız var — bu sadece cihazları eşleştirmek içindir, internete veri gitmez.</string>
     <string name="onboarding_title_3">Kendinizi Tanıtın</string>
     <string name="onboarding_desc_3">Yakınınızdaki arkadaşlarınızın sizi bulabilmesi için bir isim belirleyin. Bu isim sadece yakındaki kişilerle paylaşılır.</string>
     <string name="onboarding_name_hint">Adınız veya Takma Adınız</string>

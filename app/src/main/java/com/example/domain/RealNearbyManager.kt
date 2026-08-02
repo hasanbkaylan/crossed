@@ -100,6 +100,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
     }
 
     override fun startDiscovery(myName: String) {
+        stopDiscovery()
         this.myName = myName.ifBlank { android.os.Build.MODEL }
         discoveredDevices.clear()
         _matchStatus.value = MatchStatus.Discovering(emptyList())
@@ -118,6 +119,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
     
     override fun requestConnection(deviceId: String) {
         val device = discoveredDevices[deviceId] ?: return
+        if (_matchStatus.value is MatchStatus.Connecting || _matchStatus.value is MatchStatus.ConnectionRequested) return
         _matchStatus.value = MatchStatus.Connecting(device)
         connectionsClient.requestConnection(myName, deviceId, connectionLifecycleCallback)
             .addOnFailureListener { e ->
@@ -136,18 +138,26 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
     }
 
     override fun approveMatch(myHashes: List<String>) {
-        myHashesToSend = myHashes
-        currentEndpointId?.let { endpointId ->
-            connectionsClient.acceptConnection(endpointId, payloadCallback)
-                .addOnFailureListener { e ->
-                    _matchStatus.value = MatchStatus.Error("Failed to accept: ${e.message}")
-                }
-        } ?: run {
-            _matchStatus.value = MatchStatus.Error("No device connected.")
+        if (_matchStatus.value !is MatchStatus.ConnectionRequested && _matchStatus.value !is MatchStatus.Connecting) {
+             return
         }
+        val endpointId = currentEndpointId
+        if (endpointId == null) {
+            _matchStatus.value = MatchStatus.Error("No device connected.")
+            return
+        }
+        myHashesToSend = myHashes
+        _matchStatus.value = MatchStatus.ExchangingData
+        connectionsClient.acceptConnection(endpointId, payloadCallback)
+            .addOnFailureListener { e ->
+                _matchStatus.value = MatchStatus.Error("Failed to accept: ${e.message}")
+            }
     }
 
     override fun rejectMatch() {
+        if (_matchStatus.value !is MatchStatus.ConnectionRequested && _matchStatus.value !is MatchStatus.Connecting) {
+             return
+        }
         currentEndpointId?.let { endpointId ->
             connectionsClient.rejectConnection(endpointId)
         }

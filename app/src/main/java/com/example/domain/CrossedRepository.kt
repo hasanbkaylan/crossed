@@ -14,12 +14,11 @@ class CrossedRepository(
 
     suspend fun scanAndSavePhotos(onProgress: suspend (Int, Int) -> Unit): Pair<Int, Int> {
         val existingIds = photoDao.getAllPhotoIds().toSet()
-        val (totalScanned, photos) = photoScanner.scanPhotos(existingIds, onProgress)
+        val (newPhotosFound, photos) = photoScanner.scanPhotos(existingIds, onProgress)
         if (photos.isNotEmpty()) {
             photoDao.insertPhotos(photos)
         }
-        val finalCount = photoDao.getPhotoCount().first()
-        return Pair(totalScanned, finalCount)
+        return Pair(newPhotosFound, photos.size)
     }
 
     suspend fun getMyHashes(radiusMeters: Int): List<String> {

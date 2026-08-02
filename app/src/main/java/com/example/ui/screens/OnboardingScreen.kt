@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
@@ -62,6 +63,13 @@ fun OnboardingScreen(viewModel: MainViewModel, onFinish: () -> Unit) {
                             Text(stringResource(R.string.onboarding_desc_2), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground)
                         }
                         2 -> {
+                            Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(100.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.height(32.dp))
+                            Text(stringResource(R.string.onboarding_title_permissions), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(stringResource(R.string.onboarding_desc_permissions), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground)
+                        }
+                        3 -> {
                             Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(100.dp), tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.height(32.dp))
                             Text(stringResource(R.string.onboarding_title_3), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
@@ -83,7 +91,7 @@ fun OnboardingScreen(viewModel: MainViewModel, onFinish: () -> Unit) {
             Spacer(modifier = Modifier.weight(1f))
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                for (i in 0..2) {
+                for (i in 0..3) {
                     Box(modifier = Modifier
                         .padding(4.dp)
                         .size(if (i == currentStep) 12.dp else 8.dp)
@@ -98,7 +106,7 @@ fun OnboardingScreen(viewModel: MainViewModel, onFinish: () -> Unit) {
             
             Button(
                 onClick = {
-                    if (currentStep < 2) {
+                    if (currentStep < 3) {
                         currentStep++
                     } else {
                         scope.launch {
@@ -112,7 +120,7 @@ fun OnboardingScreen(viewModel: MainViewModel, onFinish: () -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
-                Text(if (currentStep < 2) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_start))
+                Text(if (currentStep < 3) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_start))
             }
         }
     }

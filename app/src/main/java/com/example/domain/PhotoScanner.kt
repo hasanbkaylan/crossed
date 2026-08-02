@@ -13,7 +13,8 @@ import kotlinx.coroutines.withContext
 class PhotoScanner(private val context: Context) {
     suspend fun scanPhotos(existingIds: Set<Long>, onProgress: suspend (Int, Int) -> Unit): Pair<Int, List<ScannedPhoto>> = withContext(Dispatchers.IO) {
         val photos = mutableListOf<ScannedPhoto>()
-        var totalScanned = 0
+        var newPhotosFound = 0
+        var processedCount = 0
 
         val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
@@ -41,16 +42,17 @@ class PhotoScanner(private val context: Context) {
                 val totalCount = cursor.count
 
                 while (cursor.moveToNext()) {
-                    totalScanned++
+                    processedCount++
                     val id = cursor.getLong(idColumn)
                     
                     if (existingIds.contains(id)) {
-                        if (totalScanned % 10 == 0 || totalScanned == totalCount) {
-                            onProgress(totalScanned, totalCount)
+                        if (processedCount % 1000 == 0 || processedCount == totalCount) {
+                            onProgress(processedCount, totalCount)
                         }
                         continue
                     }
                     
+                    newPhotosFound++
                     var dateTaken = cursor.getLong(dateColumn)
                     
                     val contentUri = Uri.withAppendedPath(collection, id.toString())
@@ -87,8 +89,8 @@ class PhotoScanner(private val context: Context) {
                         }
                     }
                     
-                    if (totalScanned % 10 == 0 || totalScanned == totalCount) {
-                        onProgress(totalScanned, totalCount)
+                    if (processedCount % 10 == 0 || processedCount == totalCount) {
+                        onProgress(processedCount, totalCount)
                     }
                 }
             }
@@ -97,6 +99,6 @@ class PhotoScanner(private val context: Context) {
             throw e
         }
 
-        Pair(totalScanned, photos)
+        Pair(newPhotosFound, photos)
     }
 }
