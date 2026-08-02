@@ -11,6 +11,18 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Warning
+import android.content.Context
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.net.wifi.WifiManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.Wifi
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -49,9 +61,46 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
 
     val permissionState = rememberMultiplePermissionsState(permissions)
 
-    DisposableEffect(Unit) {
-        if (permissionState.allPermissionsGranted) {
+    val context = LocalContext.current
+    val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+    val bluetoothAdapter = bluetoothManager?.adapter
+    
+    var isBluetoothEnabled by remember { mutableStateOf(bluetoothAdapter?.isEnabled == true) }
+    var isWifiEnabled by remember { 
+        mutableStateOf((context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager)?.isWifiEnabled == true)
+    }
+
+    val enableBluetoothLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        isBluetoothEnabled = bluetoothAdapter?.isEnabled == true
+    }
+    
+    val wifiSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        isWifiEnabled = (context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager)?.isWifiEnabled == true
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isBluetoothEnabled = bluetoothAdapter?.isEnabled == true
+                isWifiEnabled = (context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager)?.isWifiEnabled == true
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    DisposableEffect(permissionState.allPermissionsGranted, isBluetoothEnabled, isWifiEnabled) {
+        if (permissionState.allPermissionsGranted && isBluetoothEnabled && isWifiEnabled) {
             viewModel.startNearbyDiscovery()
+        } else {
+            viewModel.clearMatches()
         }
         onDispose {
             viewModel.clearMatches()
@@ -87,9 +136,45 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                 return@Column
             }
 
+            if (!isBluetoothEnabled) {
+                Icon(Icons.Default.Bluetooth, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Bluetooth Kapalı", style = MaterialTheme.typography.headlineMedium)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Yakındaki cihazları bulabilmek için Bluetooth'u açmanız gerekiyor.", textAlign = TextAlign.Center)
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(onClick = { 
+                    enableBluetoothLauncher.launch(android.content.Intent(android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE)) 
+                }) {
+                    Text("Bluetooth'u Aç")
+                }
+                return@Column
+            }
+
+            if (!isWifiEnabled) {
+                Icon(Icons.Default.Wifi, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Wi-Fi Kapalı", style = MaterialTheme.typography.headlineMedium)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Cihazlar arası P2P bağlantı kurabilmek için Wi-Fi'ın açık olması gerekiyor.", textAlign = TextAlign.Center)
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(onClick = { 
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                        wifiSettingsLauncher.launch(android.content.Intent(android.provider.Settings.Panel.ACTION_WIFI))
+                    } else {
+                        wifiSettingsLauncher.launch(android.content.Intent(android.provider.Settings.ACTION_WIFI_SETTINGS))
+                    }
+                }) {
+                    Text("Wi-Fi Ayarlarını Aç")
+                }
+                return@Column
+            }
+
             when (val status = matchStatus) {
                 is MatchStatus.Idle -> {
-                    // Waiting to start
+                    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text("Hazırlanıyor...", style = MaterialTheme.typography.titleLarge)
                 }
                 is MatchStatus.Discovering -> {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
@@ -131,6 +216,10 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(stringResource(R.string.nearby_connecting, status.device.name), style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.height(32.dp))
+                    OutlinedButton(onClick = { viewModel.startNearbyDiscovery() }) {
+                        Text(stringResource(R.string.nearby_btn_cancel))
+                    }
                 }
                 is MatchStatus.ConnectionRequested -> {
                     Card(
@@ -179,6 +268,10 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    OutlinedButton(onClick = { viewModel.startNearbyDiscovery() }) {
+                        Text(stringResource(R.string.nearby_btn_cancel))
+                    }
                 }
                 is MatchStatus.MatchComplete -> {
                     Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)

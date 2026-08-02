@@ -39,11 +39,15 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
                     sendData()
                 }
                 ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
-                    _matchStatus.value = MatchStatus.Error("Connection rejected by peer.")
+                    _matchStatus.value = MatchStatus.Error("Bağlantı reddedildi.")
                     stopDiscovery()
                 }
                 ConnectionsStatusCodes.STATUS_ERROR -> {
-                    _matchStatus.value = MatchStatus.Error("Connection error.")
+                    _matchStatus.value = MatchStatus.Error("Bağlantı hatası oluştu.")
+                    stopDiscovery()
+                }
+                else -> {
+                    _matchStatus.value = MatchStatus.Error("Bağlantı kurulamadı (Hata Kodu: ${result.status.statusCode})")
                     stopDiscovery()
                 }
             }
@@ -53,8 +57,8 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
             if (currentEndpointId == endpointId) {
                 currentEndpointId = null
                 if (_matchStatus.value is MatchStatus.ExchangingData) {
-                    _matchStatus.value = MatchStatus.Error("Disconnected during exchange.")
-                } else if (_matchStatus.value !is MatchStatus.MatchComplete && _matchStatus.value !is MatchStatus.NoMatch) {
+                    _matchStatus.value = MatchStatus.Error("Bağlantı koptu.")
+                } else if (_matchStatus.value !is MatchStatus.MatchComplete && _matchStatus.value !is MatchStatus.NoMatch && _matchStatus.value !is MatchStatus.Idle) {
                     _matchStatus.value = MatchStatus.Discovering(discoveredDevices.values.toList())
                 }
             }
@@ -76,7 +80,9 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
                     _matchStatus.value = MatchStatus.NoMatch
                 }
                 
-                connectionsClient.disconnectFromEndpoint(endpointId)
+                // Do not disconnect immediately. 
+                // Let the other side receive our payload. 
+                // Connection will be closed via stopDiscovery() when the user navigates away.
             }
         }
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {}
@@ -109,11 +115,15 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
         val advOptions = AdvertisingOptions.Builder().setStrategy(Strategy.P2P_POINT_TO_POINT).build()
 
         connectionsClient.startAdvertising(this.myName, SERVICE_ID, connectionLifecycleCallback, advOptions)
-            .addOnFailureListener { e -> Log.e("Nearby", "Advertising failed", e) }
+            .addOnFailureListener { e -> 
+                Log.e("Nearby", "Advertising failed", e) 
+                _matchStatus.value = MatchStatus.Error("Reklam başlatılamadı: ${e.message}")
+            }
 
         connectionsClient.startDiscovery(SERVICE_ID, endpointDiscoveryCallback, options)
             .addOnFailureListener { e ->
-                _matchStatus.value = MatchStatus.Error("Failed to start discovery: ${e.message}")
+                Log.e("Nearby", "Discovery failed", e)
+                _matchStatus.value = MatchStatus.Error("Keşif başlatılamadı: ${e.message}")
             }
     }
     
@@ -124,7 +134,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
         connectionsClient.requestConnection(myName, deviceId, connectionLifecycleCallback)
             .addOnFailureListener { e ->
                 Log.e("Nearby", "requestConnection failed", e)
-                _matchStatus.value = MatchStatus.Error("Failed to connect: ${e.message}")
+                _matchStatus.value = MatchStatus.Error("Bağlantı isteği başarısız: ${e.message}")
             }
     }
 
@@ -150,7 +160,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
         _matchStatus.value = MatchStatus.ExchangingData
         connectionsClient.acceptConnection(endpointId, payloadCallback)
             .addOnFailureListener { e ->
-                _matchStatus.value = MatchStatus.Error("Failed to accept: ${e.message}")
+                _matchStatus.value = MatchStatus.Error("Kabul işlemi başarısız: ${e.message}")
             }
     }
 
