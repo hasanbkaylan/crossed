@@ -20,9 +20,12 @@ interface PhotoDao {
     @Query("SELECT COUNT(*) FROM scanned_photos")
     fun getPhotoCount(): Flow<Int>
 
-    @Query("SELECT locationHash FROM scanned_photos")
+    @Query("SELECT id FROM scanned_photos")
+    suspend fun getAllPhotoIds(): List<Long>
+
+    @Query("SELECT DISTINCT locationHash FROM scanned_photos")
     suspend fun getAllHashes(): List<String>
 
-    @Query("SELECT * FROM scanned_photos WHERE locationHash IN (:hashes)")
+    @Query("SELECT * FROM scanned_photos WHERE locationHash IN (:hashes) GROUP BY locationHash")
     suspend fun getPhotosByHashes(hashes: List<String>): List<ScannedPhoto>
 }

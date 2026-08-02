@@ -6,18 +6,20 @@ import com.example.data.ScannedPhoto
 import com.example.domain.CrossedRepository
 import com.example.domain.MatchStatus
 import com.example.domain.NearbyManager
+import com.example.domain.SettingsManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
 import com.example.R
 
 class MainViewModel(
     private val repository: CrossedRepository,
-    private val nearbyManager: NearbyManager
+    private val nearbyManager: NearbyManager,
+    val settingsManager: SettingsManager
 ) : ViewModel() {
 
     val scannedPhotoCount: StateFlow<Int> = repository.totalPhotosCount
@@ -60,8 +62,13 @@ class MainViewModel(
 
     fun startNearbyDiscovery() {
         viewModelScope.launch {
-            nearbyManager.startDiscovery()
+            val username = settingsManager.usernameFlow.first()
+            nearbyManager.startDiscovery(username)
         }
+    }
+    
+    fun requestConnection(deviceId: String) {
+        nearbyManager.requestConnection(deviceId)
     }
 
     fun stopNearbyDiscovery() {
@@ -70,7 +77,8 @@ class MainViewModel(
 
     fun approveMatch() {
         viewModelScope.launch {
-            val hashes = repository.getMyHashes()
+            val radius = settingsManager.radiusFlow.first()
+            val hashes = repository.getMyHashes(radius)
             nearbyManager.approveMatch(hashes)
         }
     }
@@ -81,7 +89,8 @@ class MainViewModel(
     
     fun processMatches(hashes: List<String>) {
         viewModelScope.launch {
-            val photos = repository.getPhotosByHashes(hashes)
+            val radius = settingsManager.radiusFlow.first()
+            val photos = repository.getPhotosByHashes(hashes, radius)
             _matchedPhotos.value = photos
         }
     }

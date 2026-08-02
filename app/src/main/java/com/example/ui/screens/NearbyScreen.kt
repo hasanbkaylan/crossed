@@ -1,6 +1,10 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -11,16 +15,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.R
 import com.example.domain.MatchStatus
 import com.example.ui.MainViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -37,21 +44,16 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
         permissions.add(android.Manifest.permission.BLUETOOTH_SCAN)
         permissions.add(android.Manifest.permission.BLUETOOTH_ADVERTISE)
         permissions.add(android.Manifest.permission.BLUETOOTH_CONNECT)
-    }
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
         permissions.add(android.Manifest.permission.NEARBY_WIFI_DEVICES)
     }
 
-    val permissionState = com.google.accompanist.permissions.rememberMultiplePermissionsState(
-        permissions = permissions
-    )
+    val permissionState = rememberMultiplePermissionsState(permissions)
 
-    DisposableEffect(permissionState.allPermissionsGranted) {
+    DisposableEffect(Unit) {
         if (permissionState.allPermissionsGranted) {
             viewModel.startNearbyDiscovery()
         }
         onDispose {
-            viewModel.stopNearbyDiscovery()
             viewModel.clearMatches()
         }
     }
@@ -77,49 +79,62 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
             verticalArrangement = Arrangement.Center
         ) {
             if (!permissionState.allPermissionsGranted) {
-                Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.nearby_permission_denied), textAlign = TextAlign.Center)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    stringResource(R.string.nearby_permission_denied),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.error
-                )
-                Spacer(modifier = Modifier.height(24.dp))
                 Button(onClick = { permissionState.launchMultiplePermissionRequest() }) {
                     Text(stringResource(R.string.nearby_permission_grant))
                 }
-                Spacer(modifier = Modifier.height(32.dp))
-                OutlinedButton(onClick = { navController.navigateUp() }) {
-                    Text(stringResource(R.string.nearby_btn_back))
+                return@Column
+            }
+
+            when (val status = matchStatus) {
+                is MatchStatus.Idle -> {
+                    // Waiting to start
                 }
-            } else {
-                when (val status = matchStatus) {
-                is MatchStatus.Idle, is MatchStatus.Discovering -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(80.dp),
-                        strokeWidth = 6.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Text(
-                        stringResource(R.string.nearby_looking),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                is MatchStatus.Discovering -> {
+                    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(stringResource(R.string.nearby_looking), style = MaterialTheme.typography.titleLarge)
                     Text(
                         stringResource(R.string.nearby_ensure_open),
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    if (status.devices.isEmpty()) {
+                        Text("Henüz cihaz bulunamadı...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    } else {
+                        Text("Bulunan Cihazlar:", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Start))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                            items(status.devices) { device ->
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .clickable { viewModel.requestConnection(device.id) },
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                                ) {
+                                    Text(
+                                        device.name,
+                                        modifier = Modifier.padding(16.dp),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
-
-                is MatchStatus.DeviceFound -> {
+                is MatchStatus.Connecting -> {
+                    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(stringResource(R.string.nearby_connecting, status.device.name), style = MaterialTheme.typography.titleLarge)
+                }
+                is MatchStatus.ConnectionRequested -> {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(32.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         Column(
@@ -129,9 +144,10 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                             Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                stringResource(R.string.nearby_found, status.device.name),
+                                stringResource(R.string.nearby_connection_requested, status.device.name),
                                 style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
@@ -144,17 +160,16 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                OutlinedButton(onClick = { viewModel.rejectMatch(); navController.navigateUp() }) {
+                                OutlinedButton(onClick = { viewModel.rejectMatch() }) {
                                     Text(stringResource(R.string.nearby_btn_cancel))
                                 }
                                 Button(onClick = { viewModel.approveMatch() }) {
-                                    Text(stringResource(R.string.nearby_btn_compare))
+                                    Text(stringResource(R.string.nearby_btn_connect))
                                 }
                             }
                         }
                     }
                 }
-
                 is MatchStatus.ExchangingData -> {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
                     Spacer(modifier = Modifier.height(24.dp))
@@ -165,7 +180,6 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
                 is MatchStatus.MatchComplete -> {
                     Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.height(16.dp))
@@ -188,28 +202,48 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                             viewModel.processMatches(status.matchedHashes)
                         }
                     } else {
-                        // Display minimal location info (since we don't have a map api in this simple app)
-                        matchedPhotos.forEach { photo ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(stringResource(R.string.nearby_date, java.text.DateFormat.getDateTimeInstance().format(java.util.Date(photo.dateTaken))))
-                                    Text(stringResource(R.string.nearby_location, photo.latitude.toString(), photo.longitude.toString()))
+                        LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                            items(matchedPhotos) { photo ->
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        val photoUri = android.content.ContentUris.withAppendedId(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, photo.id)
+                                        AsyncImage(
+                                            model = photoUri,
+                                            contentDescription = "Matched Photo",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(64.dp)
+                                                .clip(RoundedCornerShape(8.dp))
+                                        )
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Column {
+                                            Text(
+                                                stringResource(R.string.nearby_date, java.text.DateFormat.getDateTimeInstance().format(java.util.Date(photo.dateTaken))),
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                stringResource(R.string.nearby_location, photo.latitude.toString(), photo.longitude.toString()),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                     
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = { navController.navigateUp() }) {
                         Text(stringResource(R.string.nearby_btn_done))
                     }
                 }
-
                 is MatchStatus.NoMatch -> {
                     Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(64.dp))
                     Spacer(modifier = Modifier.height(16.dp))
@@ -218,35 +252,21 @@ fun NearbyScreen(viewModel: MainViewModel, navController: NavController) {
                         style = MaterialTheme.typography.headlineMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(stringResource(R.string.nearby_no_crossings_desc))
+                    Text(stringResource(R.string.nearby_no_crossings_desc), textAlign = TextAlign.Center)
                     Spacer(modifier = Modifier.height(32.dp))
                     Button(onClick = { navController.navigateUp() }) {
                         Text(stringResource(R.string.nearby_btn_back))
                     }
                 }
-
-                is MatchStatus.NoDeviceFound -> {
-                    Icon(Icons.Default.SearchOff, contentDescription = null, modifier = Modifier.size(64.dp))
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        stringResource(R.string.nearby_no_device_found),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(stringResource(R.string.nearby_no_device_found_desc), textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Button(onClick = { navController.navigateUp() }) {
-                        Text(stringResource(R.string.nearby_btn_back))
-                    }
-                }
-
                 is MatchStatus.Error -> {
                     Text(stringResource(R.string.nearby_error, status.message), color = MaterialTheme.colorScheme.error)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.startNearbyDiscovery() }) {
+                        Text("Tekrar Dene")
+                    }
                 }
-                
                 else -> {}
             }
         }
     }
 }
-            }

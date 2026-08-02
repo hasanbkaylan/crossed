@@ -14,7 +14,7 @@
     <string name="home_scan_update">Yeni Fotoğraflar İçin Tara</string>
     <string name="home_find_nearby">Yakınımdakileri Bul</string>
     <string name="home_no_internet_warning">İnternet bağlantısı gerektirmez. Keşif tamamen yereldir (P2P).</string>
-    <string name="home_scanned_result">Toplam %1$d fotoğraf tarandı. %2$d tanesinde konum verisi bulundu.</string>
+    <string name="home_scanned_result">Toplam %1$d yeni fotoğraf tarandı. %2$d tanesinde konum verisi bulundu.</string>
     <string name="home_scan_error">Tarama hatası: %1$s</string>
     
     <string name="settings_title">Ayarlar ve Veriler</string>
@@ -26,6 +26,14 @@
     <string name="settings_language_system">Sistem Varsayılanı</string>
     <string name="settings_language_en">İngilizce</string>
     <string name="settings_language_tr">Türkçe</string>
+    <string name="settings_username_title">Görünen Ad</string>
+    <string name="settings_username_desc">Yakındaki aramalarda görünecek isim.</string>
+    <string name="settings_radius_title">Eşleşme Yarıçapı</string>
+    <string name="settings_radius_desc">Geçmişte bu mesafe içinde bulunduğunuz kişilerle eşleşirsiniz.</string>
+    <string name="radius_50">50 metre</string>
+    <string name="radius_100">100 metre</string>
+    <string name="radius_200">200 metre</string>
+    <string name="radius_500">500 metre</string>
 
     <string name="dialog_delete_title">Veriler Silinsin mi?</string>
     <string name="dialog_delete_text">Taranan tüm fotoğraflar ve konum özetleri yerel veritabanınızdan kalıcı olarak silinecek.</string>
@@ -55,12 +63,15 @@
     <string name="privacy_4_desc">Ayarlar menüsünden taranan tüm verileri anında silebilirsiniz. Her şey yerel olduğu için buradan silmek, sonsuza dek yok olması demektir.</string>
 
     <string name="nearby_title">Yakındakileri Keşfet</string>
-    <string name="nearby_looking">Yakındaki arkadaşlar aranıyor…</string>
+    <string name="nearby_looking">Yakındaki cihazlar aranıyor…</string>
     <string name="nearby_ensure_open">Arkadaşınızın uygulamasının açık ve yakında olduğundan emin olun.</string>
     <string name="nearby_found">%1$s Bulundu</string>
+    <string name="nearby_connecting">%1$s cihazına bağlanılıyor…</string>
+    <string name="nearby_connection_requested">%1$s bağlanmak istiyor.</string>
     <string name="nearby_compare_prompt">Konum geçmişinizi güvenle karşılaştırmak istiyor musunuz?</string>
     <string name="nearby_btn_cancel">İptal</string>
     <string name="nearby_btn_compare">Karşılaştır</string>
+    <string name="nearby_btn_connect">Bağlan</string>
     <string name="nearby_exchanging">Konum özetleri değiş tokuş ediliyor…</string>
     <string name="nearby_intersecting">Sadece kesişen özetler açığa çıkacaktır.</string>
     <string name="nearby_paths_crossed">Yollar Kesişti!</string>
@@ -76,4 +87,14 @@
     <string name="nearby_error">Hata: %1$s</string>
     <string name="nearby_date">Tarih: %1$s</string>
     <string name="nearby_location">Enlem: %1$s, Boylam: %2$s</string>
+    
+    <string name="onboarding_next">Devam Et</string>
+    <string name="onboarding_start">Başla</string>
+    <string name="onboarding_title_1">Crossed\'a Hoş Geldiniz</string>
+    <string name="onboarding_desc_1">Arkadaşlarınızla geçmişte nerelerde yollarınızın kesiştiğini güvenli ve eğlenceli bir şekilde keşfedin.</string>
+    <string name="onboarding_title_2">Gizliliğiniz Güvende</string>
+    <string name="onboarding_desc_2">Crossed internete bağlanmaz. Fotoğraflarınız ve konumlarınız cihazınızdan asla dışarı çıkmaz. Tüm karşılaştırmalar yerel cihazlar arasında P2P (uçtan uca) yapılır.</string>
+    <string name="onboarding_title_3">Kendinizi Tanıtın</string>
+    <string name="onboarding_desc_3">Yakınınızdaki arkadaşlarınızın sizi bulabilmesi için bir isim belirleyin. Bu isim sadece yakındaki kişilerle paylaşılır.</string>
+    <string name="onboarding_name_hint">Adınız veya Takma Adınız</string>
 </resources>

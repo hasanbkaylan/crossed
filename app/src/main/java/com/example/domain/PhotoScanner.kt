@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class PhotoScanner(private val context: Context) {
-    suspend fun scanPhotos(onProgress: suspend (Int, Int) -> Unit): Pair<Int, List<ScannedPhoto>> = withContext(Dispatchers.IO) {
+    suspend fun scanPhotos(existingIds: Set<Long>, onProgress: suspend (Int, Int) -> Unit): Pair<Int, List<ScannedPhoto>> = withContext(Dispatchers.IO) {
         val photos = mutableListOf<ScannedPhoto>()
         var totalScanned = 0
 
@@ -43,6 +43,14 @@ class PhotoScanner(private val context: Context) {
                 while (cursor.moveToNext()) {
                     totalScanned++
                     val id = cursor.getLong(idColumn)
+                    
+                    if (existingIds.contains(id)) {
+                        if (totalScanned % 10 == 0 || totalScanned == totalCount) {
+                            onProgress(totalScanned, totalCount)
+                        }
+                        continue
+                    }
+                    
                     var dateTaken = cursor.getLong(dateColumn)
                     
                     val contentUri = Uri.withAppendedPath(collection, id.toString())
@@ -74,8 +82,7 @@ class PhotoScanner(private val context: Context) {
                         val safeLon: Double = lon!!
                         if (safeLat != 0.0 || safeLon != 0.0) {
                             if (dateTaken > 0) {
-                                val hash = HashUtil.createLocationHash(safeLat, safeLon, dateTaken)
-                                photos.add(ScannedPhoto(id, dateTaken, safeLat, safeLon, hash))
+                                photos.add(ScannedPhoto(id, dateTaken, safeLat, safeLon, ""))
                             }
                         }
                     }

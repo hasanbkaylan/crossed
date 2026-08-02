@@ -6,23 +6,30 @@ import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import java.nio.charset.StandardCharsets
 
 class RealNearbyManager(private val context: Context) : NearbyManager {
     private val connectionsClient = Nearby.getConnectionsClient(context)
     private val SERVICE_ID = "com.example.crossed.SERVICE_ID"
-    private val myName = android.os.Build.MODEL
+    private var myName = android.os.Build.MODEL
 
     private val _matchStatus = MutableStateFlow<MatchStatus>(MatchStatus.Idle)
     override val matchStatus: StateFlow<MatchStatus> = _matchStatus
 
     private var currentEndpointId: String? = null
     private var myHashesToSend: List<String>? = null
+    private val discoveredDevices = mutableMapOf<String, NearbyDevice>()
 
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             currentEndpointId = endpointId
-            _matchStatus.value = MatchStatus.DeviceFound(NearbyDevice(endpointId, info.endpointName))
+            // If we initiated it, we are in Connecting. If they initiated, we are in ConnectionRequested.
+            if (info.isIncomingConnection) {
+                _matchStatus.value = MatchStatus.ConnectionRequested(NearbyDevice(endpointId, info.endpointName))
+            } else {
+                _matchStatus.value = MatchStatus.Connecting(NearbyDevice(endpointId, info.endpointName))
+            }
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
@@ -47,6 +54,8 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
                 currentEndpointId = null
                 if (_matchStatus.value is MatchStatus.ExchangingData) {
                     _matchStatus.value = MatchStatus.Error("Disconnected during exchange.")
+                } else if (_matchStatus.value !is MatchStatus.MatchComplete && _matchStatus.value !is MatchStatus.NoMatch) {
+                    _matchStatus.value = MatchStatus.Discovering(discoveredDevices.values.toList())
                 }
             }
         }
@@ -67,42 +76,53 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
                     _matchStatus.value = MatchStatus.NoMatch
                 }
                 
-                // We disconnect after exchange
                 connectionsClient.disconnectFromEndpoint(endpointId)
             }
         }
-
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {}
     }
 
     private val endpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
-            // Found a device, let's request connection
-            connectionsClient.requestConnection(myName, endpointId, connectionLifecycleCallback)
-                .addOnFailureListener { e ->
-                    Log.e("Nearby", "requestConnection failed", e)
-                }
+            val device = NearbyDevice(endpointId, info.endpointName)
+            discoveredDevices[endpointId] = device
+            if (_matchStatus.value is MatchStatus.Discovering) {
+                _matchStatus.value = MatchStatus.Discovering(discoveredDevices.values.toList())
+            }
         }
 
         override fun onEndpointLost(endpointId: String) {
-            if (currentEndpointId == endpointId && _matchStatus.value is MatchStatus.DeviceFound) {
-                _matchStatus.value = MatchStatus.Discovering
+            discoveredDevices.remove(endpointId)
+            if (_matchStatus.value is MatchStatus.Discovering) {
+                _matchStatus.value = MatchStatus.Discovering(discoveredDevices.values.toList())
             }
         }
     }
 
-    override fun startDiscovery() {
-        _matchStatus.value = MatchStatus.Discovering
+    override fun startDiscovery(myName: String) {
+        this.myName = myName.ifBlank { android.os.Build.MODEL }
+        discoveredDevices.clear()
+        _matchStatus.value = MatchStatus.Discovering(emptyList())
         
         val options = DiscoveryOptions.Builder().setStrategy(Strategy.P2P_POINT_TO_POINT).build()
         val advOptions = AdvertisingOptions.Builder().setStrategy(Strategy.P2P_POINT_TO_POINT).build()
 
-        connectionsClient.startAdvertising(myName, SERVICE_ID, connectionLifecycleCallback, advOptions)
+        connectionsClient.startAdvertising(this.myName, SERVICE_ID, connectionLifecycleCallback, advOptions)
             .addOnFailureListener { e -> Log.e("Nearby", "Advertising failed", e) }
 
         connectionsClient.startDiscovery(SERVICE_ID, endpointDiscoveryCallback, options)
             .addOnFailureListener { e ->
                 _matchStatus.value = MatchStatus.Error("Failed to start discovery: ${e.message}")
+            }
+    }
+    
+    override fun requestConnection(deviceId: String) {
+        val device = discoveredDevices[deviceId] ?: return
+        _matchStatus.value = MatchStatus.Connecting(device)
+        connectionsClient.requestConnection(myName, deviceId, connectionLifecycleCallback)
+            .addOnFailureListener { e ->
+                Log.e("Nearby", "requestConnection failed", e)
+                _matchStatus.value = MatchStatus.Error("Failed to connect: ${e.message}")
             }
     }
 
@@ -111,6 +131,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
         connectionsClient.stopDiscovery()
         connectionsClient.stopAllEndpoints()
         currentEndpointId = null
+        discoveredDevices.clear()
         _matchStatus.value = MatchStatus.Idle
     }
 
@@ -130,7 +151,7 @@ class RealNearbyManager(private val context: Context) : NearbyManager {
         currentEndpointId?.let { endpointId ->
             connectionsClient.rejectConnection(endpointId)
         }
-        stopDiscovery()
+        _matchStatus.value = MatchStatus.Discovering(discoveredDevices.values.toList())
     }
     
     private fun sendData() {
